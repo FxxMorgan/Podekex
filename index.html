@@ -14,6 +14,10 @@
   <script src="libs/gsap/ScrollTrigger.min.js" defer></script>
   <script src="libs/gsap/ScrollSmoother.min.js" defer></script>
   <script src="js/app.js" defer></script>
+
+  <style>
+    /* Estilos CSS adicionales */
+  </style>
 </head>
 <body>
   <div class="wrapper">
@@ -32,122 +36,117 @@
       <article class="main-article" style="background-image: url(img/dungeon.jpg);">
         <div class="main-article__content">
           <h2 class="main-article__header">Tierra de misterios &amp; aventuras</h2>
-          <p class="main-article__paragraph">sample text</p>
+          <p class="main-article__paragraph">Texto de ejemplo</p>
         </div>
       </article>
-      <div id="pokedex"></div>
+      <div id="pokedex" class="pokedex"></div>
     </div>
   </div>
-
-
-  
-
   <script>
+    async function getPokemonData(pokemonId) {
+      try {
+        const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+        const pokemon = response.data;
 
-	async function getPokemonData(pokemonId) {
-	  try {
-	    const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
-	    const pokemon = response.data;
+        const speciesResponse = await axios.get(pokemon.species.url);
+        const speciesData = speciesResponse.data;
 
-	    const speciesResponse = await axios.get(pokemon.species.url);
-	    const speciesData = speciesResponse.data;
+        const flavorTextEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'es');
+        const description = flavorTextEntries.length > 0 ? flavorTextEntries[0].flavor_text : '';
 
-	    const flavorTextEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'es');
-	    const description = flavorTextEntries.length > 0 ? flavorTextEntries[0].flavor_text : '';
+        const types = await Promise.all(
+          pokemon.types.map(async (type) => {
+            const typeResponse = await axios.get(type.type.url);
+            const typeName = typeResponse.data.names.find((name) => name.language.name === 'es').name;
+            return typeName;
+          })
+        );
 
-	    const types = await Promise.all(
-	      pokemon.types.map(async (type) => {
-	        const typeResponse = await axios.get(type.type.url);
-	        const typeName = typeResponse.data.names.find((name) => name.language.name === 'es').name;
-	        return typeName;
-	      })
-	    );
+        pokemon.types = types;
+        pokemon.description = description;
 
-	    pokemon.types = types;
-	    pokemon.description = description;
+        return pokemon;
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
-	    return pokemon;
-	  } catch (error) {
-	    console.error(error);
-	  }
-	}
+    let page = 1;
+    const limit = 20;
+    let isLoading = false;
 
-	let page = 1;
-	const limit = 20;
+    window.onscroll = async () => {
+      if (!isLoading && window.scrollY + window.innerHeight >= document.documentElement.offsetHeight) {
+        isLoading = true;
+        page++;
+        await generatePokedex();
+        isLoading = false;
+      }
+    };
 
-	let isLoading = false;
+    async function generatePokedex() {
+      const pokedexContainer = document.getElementById('pokedex');
+      for (let i = (page - 1) * limit + 1; i <= page * limit; i++) {
+        const pokemon = await getPokemonData(i);
 
-	window.onscroll = async () => {
-	  if (!isLoading && window.scrollY + window.innerHeight >= document.documentElement.offsetHeight) {
-	    isLoading = true;
-	    page++;
-	    await generatePokedex();
-	    isLoading = false;
-	  }
-	};
+        const pokemonElement = document.createElement('div');
+        pokemonElement.classList.add('pokemon');
+        pokemon.types.forEach(type => pokemonElement.classList.add(type.toLowerCase()));
 
-	async function generatePokedex() {
+        const pokemonNumber = i.toString().padStart(3, '0');
+        const imagePath = `assets/pokemon/${pokemonNumber}.png`;
 
-	  const pokedexContainer = document.getElementById('pokedex');
-	  for (let i = (page - 1) * limit + 1; i <= page * limit; i++) {
-	    const pokemon = await getPokemonData(i);
+        pokemonElement.style.backgroundImage = `url(${imagePath})`;
 
-	    const pokemonElement = document.createElement('div');
-	    pokemonElement.classList.add('pokemon');
-	    pokemon.types.forEach(type => pokemonElement.classList.add(type.toLowerCase()));
-	    pokemonElement.style.background = getBackgroundColor(pokemon.types);
-	    pokemonElement.innerHTML = `
-	      <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" />
-	      <div class="pokemon-info">
-	        <h3>${pokemon.name}</h3>
-	        <p>Tipo: ${pokemon.types.join(', ')}</p>
-	        <p>${pokemon.description}</p>
-	      </div>
-	    `;
+        pokemonElement.innerHTML = `
+          <div class="pokemon-info">
+            <h3>${pokemon.name}</h3>
+            <p>Tipo: ${pokemon.types.join(', ')}</p>
+            <p>${pokemon.description}</p>
+          </div>
+        `;
 
-	    pokedexContainer.appendChild(pokemonElement);
-	  }
-	}
+        pokedexContainer.appendChild(pokemonElement);
+      }
+    }
 
-	generatePokedex();
+    generatePokedex();
 
-	window.onscroll = async () => {
-	  if (window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
-	    page++;
-	    await generatePokedex();
-	  }
-	};
+    window.onscroll = async () => {
+      if (window.scrollY + window.innerHeight >= document.documentElement.offsetHeight) {
+        page++;
+        await generatePokedex();
+      }
+    }
 
-	function getBackgroundColor(types) {
-  const colors = {
-    normal: '#A8A878',
-    fire: '#F08030',
-    water: '#6890F0',
-    electric: '#F8D030',
-    grass: '#78C850',
-    ice: '#98D8D8',
-    fighting: '#C03028',
-    poison: '#A040A0',
-    ground: '#E0C068',
-    flying: '#A890F0',
-    psychic: '#F85888',
-    bug: '#A8B820',
-    rock: '#B8A038',
-    ghost: '#705898',
-    dragon: '#7038F8',
-    dark: '#705848',
-    steel: '#B8B8D0',
-    fairy: '#EE99AC',
-  };
+    function getBackgroundColor(types) {
+      const colors = {
+        normal: '#A8A878',
+        fire: '#F08030',
+        water: '#6890F0',
+        electric: '#F8D030',
+        grass: '#78C850',
+        ice: '#98D8D8',
+        fighting: '#C03028',
+        poison: '#A040A0',
+        ground: '#E0C068',
+        flying: '#A890F0',
+        psychic: '#F85888',
+        bug: '#A8B820',
+        rock: '#B8A038',
+        ghost: '#705898',
+        dragon: '#7038F8',
+        dark: '#705848',
+        steel: '#B8B8D0',
+        fairy: '#EE99AC',
+      };
 
-  const backgroundColors = types.map(type => colors[type.toLowerCase()]);
-  const gradientColors = backgroundColors.length > 1 ? backgroundColors : [backgroundColors[0], backgroundColors[0]];
+      const backgroundColors = types.map(type => colors[type.toLowerCase()]);
+      const gradientColors = backgroundColors.length > 1 ? backgroundColors : [backgroundColors[0], backgroundColors[0]];
 
-  const bgColor = `linear-gradient(90deg, ${gradientColors[0]} 50%, ${gradientColors[1]} 50%)`;
-  return bgColor;
-}
-
-
+      const bgColor = `linear-gradient(90deg, ${gradientColors[0]} 50%, ${gradientColors[1]} 50%)`;
+      return bgColor;
+    }
   </script>
 </body>
 </html>
