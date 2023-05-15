@@ -327,58 +327,123 @@ body {
 	background: linear-gradient(to right, red, #705898);
 }
 
-@media screen and (max-width: 767px) {
-	/* Estilos específicos para dispositivos móviles */
+@/* Estilos para pantallas grandes */
+@media (min-width: 1024px) {
+	/* Ajusta los estilos del encabezado principal */
+	.main-header {
+	  padding: 60px 0;
+	}
   
-	/* Ajustar el tamaño de fuente del encabezado principal */
+	.layers__caption {
+	  font-size: 48px;
+	}
+  
 	.layers__title {
-	  font-size: calc(var(--index) * 1.5);
+	  font-size: 72px;
 	}
   
-	/* Ajustar el tamaño de fuente del párrafo del artículo principal */
+	/* Ajusta el tamaño del texto en el artículo principal */
+	.main-article__header {
+	  font-size: 36px;
+	}
+  
 	.main-article__paragraph {
-	  font-size: calc(var(--index) * 0.8);
-	  max-width: calc(var(--index) * 25);
-	}
-  
-	/* Ajustar el tamaño de la imagen del Pokémon */
-	.pokemon img {
-	  height: 250px;
-	  margin-left: 0;
-	}
-  
-	/* Ajustar el espaciado del texto del Pokémon */
-	.pokemon-info {
-	  padding: 10px;
+	  font-size: 24px;
 	}
   }
-
   
-  .search-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-bottom: 20px;
+  /* Estilos para pantallas medianas */
+  @media (max-width: 1023px) {
+	/* Ajusta los estilos del encabezado principal */
+	.main-header {
+	  padding: 40px 0;
+	}
+  
+	.layers__caption {
+	  font-size: 36px;
+	}
+  
+	.layers__title {
+	  font-size: 54px;
+	}
+  
+	/* Ajusta el tamaño del texto en el artículo principal */
+	.main-article__header {
+	  font-size: 28px;
+	}
+  
+	.main-article__paragraph {
+	  font-size: 18px;
+	}
   }
   
-  #search-input {
-	padding: 5px;
-	font-size: 16px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
+  /* Estilos para pantallas pequeñas */
+  @media (max-width: 767px) {
+	/* Ajusta los estilos del encabezado principal */
+	.main-header {
+	  padding: 20px 0;
+	}
+  
+	.layers__caption {
+	  font-size: 24px;
+	}
+  
+	.layers__title {
+	  font-size: 36px;
+	}
+  
+	/* Ajusta el tamaño del texto en el artículo principal */
+	.main-article__header {
+	  font-size: 18px;
+	}
+  
+	.main-article__paragraph {
+	  font-size: 14px;
+	}
   }
   
+  /* Estilos para dispositivos móviles */
+  @media (max-width: 480px) {
+	/* Ajusta los estilos del encabezado principal */
+	.main-header {
+	  padding: 10px 0;
+	}
   
-  #search-button {
-	/* Estilos para el botón de búsqueda */
-	/* Otros estilos que ya tienes en tu archivo CSS */
-	/* ... */
-	/* Agrega estilos específicos para el botón de búsqueda */
-	padding: 5px;
+	.layers__caption {
+	  font-size: 18px;
+	}
+  
+	.layers__title {
+	  font-size: 24px;
+	}
+  
+	/* Ajusta el tamaño del texto en el artículo principal */
+	.main-article__header {
+	  font-size: 16px;
+	}
+  
+	.main-article__paragraph {
+	  font-size: 12px;
+	}
   }
   
-  #search-button i {
-	/* Estilos para el ícono de la lupa */
-	color: #fff;
-  }
+  /* Estilos adicionales para pantallas pequeñas y orientación vertical */
+  @media (max-width: 767px) and (orientation: portrait) {
+	/* Ajusta el tamaño del texto en el encabezado principal */
+	.layers__caption {
+	  font-size: 18px;
+	}
   
+	.layers__title {
+	  font-size: 24px;
+	}
+  
+	/* Ajusta el tamaño del texto en el artículo principal */
+	.main-article__header {
+	  font-size: 16px;
+	}
+  
+	.main-article__paragraph {
+	  font-size: 12px;
+	}
+  }
