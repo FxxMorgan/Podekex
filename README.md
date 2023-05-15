@@ -1,7 +1,7 @@
 # Pokedex
 
-:pencil2: Made for practice
+:FxxMorgan: Realizado por practica
 
-- [Live](https://js-pokedex-virid.vercel.app/)
-- [Design by AC1design](https://dribbble.com/shots/15128634-Pokemon-Pokedex-Website-Redesign-Concept)
+- [Live](https://fxxmorgan.github.io/Podekex/)
 - [PokeAPI](https://pokeapi.co/)
+- [Instgram](https://instagram.com/Fxx_Morgan)
