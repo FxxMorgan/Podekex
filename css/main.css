@@ -327,7 +327,7 @@ body {
 	background: linear-gradient(to right, red, #705898);
 }
 
-@/* Estilos para pantallas grandes */
+/* Estilos para pantallas grandes */
 @media (min-width: 1024px) {
 	/* Ajusta los estilos del encabezado principal */
 	.main-header {
