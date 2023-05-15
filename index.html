@@ -1,152 +1,159 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pokedex</title>
-  <link rel="stylesheet" href="css/main.css">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="path/to/fontawesome/css/all.min.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="libs/gsap/gsap.min.js" defer></script>
-  <script src="libs/gsap/ScrollTrigger.min.js" defer></script>
-  <script src="libs/gsap/ScrollSmoother.min.js" defer></script>
-  <script src="js/app.js" defer></script>
-
-  <style>
-    /* Estilos CSS adicionales */
-  </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeDex</title>
+    <script src="./javascript/setup.js"></script>
+    <script src="./javascript/pokemon-list.js"></script>
+    <script src="./javascript/pokemon-info.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
 </head>
-<body>
-  <div class="wrapper">
-    <div class="content">
-      <header class="main-header">
-        <div class="layers">
-          <div class="layer__header">
-            <div class="layers__caption">Bienvenidos a</div>
-            <div class="layers__title">¡Pokemon!</div>
-          </div>
-          <div class="layer layers__base" style="background-image: url(img/layer-base.png);"></div>
-          <div class="layer layers__middle" style="background-image: url(img/layer-middle.png);"></div>
-          <div class="layer layers__front" style="background-image: url(img/layer-front.png);"></div>
-        </div>
-      </header>
-      <article class="main-article" style="background-image: url(img/dungeon.jpg);">
-        <div class="main-article__content">
-          <h2 class="main-article__header">Tierra de misterios &amp; aventuras</h2>
-          <p class="main-article__paragraph">Texto de ejemplo</p>
-        </div>
-      </article>
-      <div id="pokedex" class="pokedex"></div>
+<body onload="getAllNames()" class="row">
+    <!-- Div de carga de configuración -->
+    <div id="loading-div">
+        <img src="src/pokeball-icon.png" class="loading-ball">
     </div>
-  </div>
-  <script>
-    async function getPokemonData(pokemonId) {
-      try {
-        const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
-        const pokemon = response.data;
 
-        const speciesResponse = await axios.get(pokemon.species.url);
-        const speciesData = speciesResponse.data;
+    <!-- Barra de búsqueda y renderizado de búsqueda de pokémon -->
+    <div id="pokedex-list" class="column">
 
-        const flavorTextEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'es');
-        const description = flavorTextEntries.length > 0 ? flavorTextEntries[0].flavor_text : '';
+        <!-- Barra de búsqueda -->
+        <div id="search-bar-container" class="row container margin-40">
+            <input id="search-input" onkeydown="search()" placeholder="Buscar tu Pokémon">
+            <div id="start-search-button" class="center">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
 
-        const types = await Promise.all(
-          pokemon.types.map(async (type) => {
-            const typeResponse = await axios.get(type.type.url);
-            const typeName = typeResponse.data.names.find((name) => name.language.name === 'es').name;
-            return typeName;
-          })
-        );
+        <div id="pokedex-list-render-container">
+            <!-- Renderizar aquí -->
+        </div>
+    </div>
+    
+    <!-- Responsivo para el Pokémon actual -->
+    <div id="current-pokemon-responsive-background" class="hide"></div>
+    <div id="current-pokemon-responsive-close" class="hide" onclick="closePokemonInfo()"><img src="src/close-icon.png"></div>
 
-        pokemon.types = types;
-        pokemon.description = description;
+    <!-- Pokémon actual seleccionado -->
+    <div id="current-pokemon-container" class="container column center">
+    
 
-        return pokemon;
-      } catch (error) {
-        console.error(error);
-      }
-    }
+        <img id="current-pokemon-image" src="src/no-pokemon-selected-image.png">
 
-    let page = 1;
-    const limit = 20;
-    let isLoading = false;
+        <!-- Información -->
+        <div id="current-pokemon-info" class="hide">
+            <!-- ID -->
+            <span id="current-pokemon-id" class="font-size-12 bold">#213</span>
+            
+            <!-- Nombre -->
+            <h2 id="current-pokemon-name">Pikachu</h2>
 
-    window.onscroll = async () => {
-      if (!isLoading && window.scrollY + window.innerHeight >= document.documentElement.offsetHeight) {
-        isLoading = true;
-        page++;
-        await generatePokedex();
-        isLoading = false;
-      }
-    };
+            <!-- Tipos -->
+            <div id="current-pokemon-types" class="row center"></div>
 
-    async function generatePokedex() {
-      const pokedexContainer = document.getElementById('pokedex');
-      for (let i = (page - 1) * limit + 1; i <= page * limit; i++) {
-        const pokemon = await getPokemonData(i);
+            <!-- Descripción -->
+            <h4>Entrada en la Pokédex</h4>
+            <span id="current-pokemon-description"></span>
 
-        const pokemonElement = document.createElement('div');
-        pokemonElement.classList.add('pokemon');
-        pokemon.types.forEach(type => pokemonElement.classList.add(type.toLowerCase()));
+            <!-- Altura y peso -->
+            <div class="row center">
+                <div class="width-100 column center margin-5">
+                    <h4>Altura</h4>
+                    <div  id="current-pokemon-height" class="pokemon-info-variable-container"></div>
+                </div>
+                <div class="width-100 column center margin-5">
+                    <h4>Peso</h4>
+                    <div id="current-pokemon-weight" class="pokemon-info-variable-container"></div>
+                </div>
+            </div>
 
-        const pokemonNumber = i.toString().padStart(3, '0');
-        const imagePath = `assets/pokemon/${pokemonNumber}.png`;
+<!-- Habilidades -->
+<div class="column">
+    <h4>Habilidades</h4>
+    <div class="row">
+        <div id="current-pokemon-ability-name-0" class="pokemon-info-variable-container"></div>
+        <div id="current-pokemon-ability-desc-0" class="pokemon-info-variable-container"></div>
+    </div>
+</div>
 
-        pokemonElement.style.backgroundImage = `url(${imagePath})`;
 
-        pokemonElement.innerHTML = `
-          <div class="pokemon-info">
-            <h3>${pokemon.name}</h3>
-            <p>Tipo: ${pokemon.types.join(', ')}</p>
-            <p>${pokemon.description}</p>
-          </div>
-        `;
+             <!-- Estadísticas -->
+             <h4>Estadísticas</h4>
+             <div class="row center">
+                 <div class="current-pokemon-stats-container column">
+                     <div class="current-pokemon-stats-name" style="background: #DF2140">
+                         PS
+                     </div>
+                     <h5 id="current-pokemon-stats-hp">84</h5>
+                 </div>
+                 <div class="current-pokemon-stats-container column">
+                     <div class="current-pokemon-stats-name" style="background: #FF994D">
+                         ATK
+                     </div>
+                     <h5 id="current-pokemon-stats-atk">84</h5>
+                 </div>
+                 <div class="current-pokemon-stats-container column">
+                     <div class="current-pokemon-stats-name" style="background: #eecd3d">
+                         DEF
+                     </div>
+                     <h5 id="current-pokemon-stats-def">84</h5>
+                 </div>
+                 <div class="current-pokemon-stats-container column">
+                     <div class="current-pokemon-stats-name" style="background: #85DDFF">
+                         At. Esp.
+                     </div>
+                     <h5 id="current-pokemon-stats-spa">84</h5>
+                 </div>
+                 <div class="current-pokemon-stats-container column">
+                     <div class="current-pokemon-stats-name" style="background: #96da83">
+                         Def. Esp.
+                     </div>
+                     <h5 id="current-pokemon-stats-spd">84</h5>
+                 </div>
+                 <div class="current-pokemon-stats-container column">
+                     <div class="current-pokemon-stats-name" style="background: #FB94A8">
+                         Velocidad
+                     </div>
+                     <h5 id="current-pokemon-stats-speed">84</h5>
+                 </div>
+                 <div class="current-pokemon-stats-container column" style="background: #88AAEA">
+                     <div class="current-pokemon-stats-name" style="background: #7195DC">
+                         TOTAL
+                     </div>
+                     <h5 id="current-pokemon-stats-total">84</h5>
+                 </div>
+             </div>
+ 
+             <!-- Cadena de evolución -->
+             <div id="current-pokemon-evolution-chain-container">
+                 <h4>Evolución</h4>
+                 <div class="row center">
+                     <img id="current-pokemon-evolution-0" class="current-pokemon-evolution-image" src="./src/pokeball-icon.png">
+                     <div id="current-pokemon-evolution-level-0" class="current-pokemon-evolution-level-container font-size-12 bold">Nv. 16</div>
+                     <img id="current-pokemon-evolution-1" class="current-pokemon-evolution-image" src="./src/pokeball-icon.png">
+                     <div id="current-pokemon-evolution-level-1"class="current-pokemon-evolution-level-container font-size-12 bold">Nv. 36</div>
+                     <img id="current-pokemon-evolution-2" class="current-pokemon-evolution-image" src="./src/pokeball-icon.png">
+                 </div>
+             </div>
+         </div>
+ 
 
-        pokedexContainer.appendChild(pokemonElement);
-      }
-    }
+        <!--Empty-->
+        <div id="current-pokemon-empty">
+            <span class="font-size-18">Elige un pokemon<br>para mostrarlo</span>
+        </div>
+    </div>
 
-    generatePokedex();
+    <!--boton subir-->
+    <div id="back-to-top-button" class="hide" onclick="backToTop()">
+        <img src="src/arrow-up-icon.png">
+    </div>
 
-    window.onscroll = async () => {
-      if (window.scrollY + window.innerHeight >= document.documentElement.offsetHeight) {
-        page++;
-        await generatePokedex();
-      }
-    }
+    <!--cargar pokemon seleccionado-->
+    <img id="current-pokemon-loading" src="src/pokeball-icon.png" class="loading-ball">
 
-    function getBackgroundColor(types) {
-      const colors = {
-        normal: '#A8A878',
-        fire: '#F08030',
-        water: '#6890F0',
-        electric: '#F8D030',
-        grass: '#78C850',
-        ice: '#98D8D8',
-        fighting: '#C03028',
-        poison: '#A040A0',
-        ground: '#E0C068',
-        flying: '#A890F0',
-        psychic: '#F85888',
-        bug: '#A8B820',
-        rock: '#B8A038',
-        ghost: '#705898',
-        dragon: '#7038F8',
-        dark: '#705848',
-        steel: '#B8B8D0',
-        fairy: '#EE99AC',
-      };
-
-      const backgroundColors = types.map(type => colors[type.toLowerCase()]);
-      const gradientColors = backgroundColors.length > 1 ? backgroundColors : [backgroundColors[0], backgroundColors[0]];
-
-      const bgColor = `linear-gradient(90deg, ${gradientColors[0]} 50%, ${gradientColors[1]} 50%)`;
-      return bgColor;
-    }
-  </script>
 </body>
 </html>
