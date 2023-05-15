@@ -39,44 +39,10 @@
     </div>
   </div>
 
-  <div class="search-container">
-	<input type="text" id="search-input" placeholder="Buscar Pokémon">
-	<button id="search-button"><i class="fas fa-search"></i></button>
-  </div>
+
   
 
   <script>
-
-	// Obtén los elementos del DOM para el campo de búsqueda y el botón de búsqueda
-	const searchInput = document.getElementById('search-input');
-	const searchButton = document.getElementById('search-button');
-
-	// Agrega un evento de clic al botón de búsqueda
-	searchButton.addEventListener('click', () => {
-	  const searchTerm = searchInput.value.toLowerCase();
-	  searchPokemon(searchTerm);
-	});
-
-	// Agrega un evento de pulsación de tecla al campo de entrada de texto
-	searchInput.addEventListener('keypress', (event) => {
-	  if (event.key === 'Enter') {
-	    const searchTerm = searchInput.value.toLowerCase();
-	    searchPokemon(searchTerm);
-	  }
-	});
-
-	// Función de búsqueda de Pokémon
-	function searchPokemon(searchTerm) {
-	  const pokemonElements = document.getElementsByClassName('pokemon');
-	  Array.from(pokemonElements).forEach((pokemonElement) => {
-	    const pokemonName = pokemonElement.querySelector('h3').textContent.toLowerCase();
-	    if (pokemonName.includes(searchTerm)) {
-	      pokemonElement.style.display = 'block';
-	    } else {
-	      pokemonElement.style.display = 'none';
-	    }
-	  });
-	}
 
 	async function getPokemonData(pokemonId) {
 	  try {
