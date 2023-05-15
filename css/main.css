@@ -375,6 +375,18 @@ body {
 	.main-article__paragraph {
 	  font-size: 18px;
 	}
+  
+	/* Ajusta el diseño de los Pokémon y sus descripciones */
+	.pokemon {
+	  display: flex;
+	  flex-direction: column;
+	  align-items: center;
+	  text-align: center;
+	}
+  
+	.pokemon .pokemon-info {
+	  margin-top: 10px;
+	}
   }
   
   /* Estilos para pantallas pequeñas */
@@ -399,6 +411,15 @@ body {
   
 	.main-article__paragraph {
 	  font-size: 14px;
+	}
+  
+	/* Ajusta el diseño de los Pokémon y sus descripciones */
+	.pokemon {
+	  flex-direction: column;
+	}
+  
+	.pokemon .pokemon-info {
+	  margin-top: 10px;
 	}
   }
   
@@ -425,25 +446,43 @@ body {
 	.main-article__paragraph {
 	  font-size: 12px;
 	}
+  
+  /* Ajusta el diseño de los Pokémon y sus descripciones */
+  .pokemon {
+    flex-direction: column;
   }
-  
-  /* Estilos adicionales para pantallas pequeñas y orientación vertical */
-  @media (max-width: 767px) and (orientation: portrait) {
-	/* Ajusta el tamaño del texto en el encabezado principal */
-	.layers__caption {
-	  font-size: 18px;
-	}
-  
-	.layers__title {
-	  font-size: 24px;
-	}
-  
-	/* Ajusta el tamaño del texto en el artículo principal */
-	.main-article__header {
-	  font-size: 16px;
-	}
-  
-	.main-article__paragraph {
-	  font-size: 12px;
-	}
+
+  .pokemon .pokemon-info {
+    margin-top: 10px;
   }
+}
+
+/* Estilos adicionales para pantallas pequeñas y orientación vertical */
+@media (max-width: 767px) and (orientation: portrait) {
+  /* Ajusta el tamaño del texto en el encabezado principal */
+  .layers__caption {
+    font-size: 18px;
+  }
+
+  .layers__title {
+    font-size: 24px;
+  }
+
+  /* Ajusta el tamaño del texto en el artículo principal */
+  .main-article__header {
+    font-size: 16px;
+  }
+
+  .main-article__paragraph {
+    font-size: 12px;
+  }
+
+  /* Ajusta el diseño de los Pokémon y sus descripciones */
+  .pokemon {
+    flex-direction: column;
+  }
+
+  .pokemon .pokemon-info {
+    margin-top: 10px;
+  }
+}
