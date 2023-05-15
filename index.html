@@ -7,6 +7,7 @@
   <title>Pokedex</title>
   <link rel="stylesheet" href="css/main.css">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="path/to/fontawesome/css/all.min.css">
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="libs/gsap/gsap.min.js" defer></script>
@@ -38,86 +39,120 @@
     </div>
   </div>
 
+  <div class="search-container">
+	<input type="text" id="search-input" placeholder="Buscar Pokémon">
+	<button id="search-button"><i class="fas fa-search"></i></button>
+  </div>
+  
+
   <script>
-    async function getPokemonData(pokemonId) {
-      try {
-        const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
-        const pokemon = response.data;
 
-        const speciesResponse = await axios.get(pokemon.species.url);
-        const speciesData = speciesResponse.data;
+	// Obtén los elementos del DOM para el campo de búsqueda y el botón de búsqueda
+	const searchInput = document.getElementById('search-input');
+	const searchButton = document.getElementById('search-button');
 
-        const flavorTextEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'es');
-        const description = flavorTextEntries.length > 0 ? flavorTextEntries[0].flavor_text : '';
+	// Agrega un evento de clic al botón de búsqueda
+	searchButton.addEventListener('click', () => {
+	  const searchTerm = searchInput.value.toLowerCase();
+	  searchPokemon(searchTerm);
+	});
 
-        const types = await Promise.all(
-          pokemon.types.map(async (type) => {
-            const typeResponse = await axios.get(type.type.url);
-            const typeName = typeResponse.data.names.find((name) => name.language.name === 'es').name;
-            return typeName;
-          })
-        );
+	// Agrega un evento de pulsación de tecla al campo de entrada de texto
+	searchInput.addEventListener('keypress', (event) => {
+	  if (event.key === 'Enter') {
+	    const searchTerm = searchInput.value.toLowerCase();
+	    searchPokemon(searchTerm);
+	  }
+	});
 
-        pokemon.types = types;
-        pokemon.description = description;
+	// Función de búsqueda de Pokémon
+	function searchPokemon(searchTerm) {
+	  const pokemonElements = document.getElementsByClassName('pokemon');
+	  Array.from(pokemonElements).forEach((pokemonElement) => {
+	    const pokemonName = pokemonElement.querySelector('h3').textContent.toLowerCase();
+	    if (pokemonName.includes(searchTerm)) {
+	      pokemonElement.style.display = 'block';
+	    } else {
+	      pokemonElement.style.display = 'none';
+	    }
+	  });
+	}
 
-        return pokemon;
-      } catch (error) {
-        console.error(error);
-      }
-    }
+	async function getPokemonData(pokemonId) {
+	  try {
+	    const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+	    const pokemon = response.data;
+
+	    const speciesResponse = await axios.get(pokemon.species.url);
+	    const speciesData = speciesResponse.data;
+
+	    const flavorTextEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'es');
+	    const description = flavorTextEntries.length > 0 ? flavorTextEntries[0].flavor_text : '';
+
+	    const types = await Promise.all(
+	      pokemon.types.map(async (type) => {
+	        const typeResponse = await axios.get(type.type.url);
+	        const typeName = typeResponse.data.names.find((name) => name.language.name === 'es').name;
+	        return typeName;
+	      })
+	    );
+
+	    pokemon.types = types;
+	    pokemon.description = description;
+
+	    return pokemon;
+	  } catch (error) {
+	    console.error(error);
+	  }
+	}
 
 	let page = 1;
-const limit = 20;
+	const limit = 20;
 
-let isLoading = false;
+	let isLoading = false;
 
-window.onscroll = async () => {
-  if (!isLoading && window.scrollY + window.innerHeight >= document.documentElement.offsetHeight) {
-    isLoading = true;
-    page++;
-    await generatePokedex();
-    isLoading = false;
-  }
-};
+	window.onscroll = async () => {
+	  if (!isLoading && window.scrollY + window.innerHeight >= document.documentElement.offsetHeight) {
+	    isLoading = true;
+	    page++;
+	    await generatePokedex();
+	    isLoading = false;
+	  }
+	};
 
+	async function generatePokedex() {
 
+	  const pokedexContainer = document.getElementById('pokedex');
+	  for (let i = (page - 1) * limit + 1; i <= page * limit; i++) {
+	    const pokemon = await getPokemonData(i);
 
+	    const pokemonElement = document.createElement('div');
+	    pokemonElement.classList.add('pokemon');
+	    pokemon.types.forEach(type => pokemonElement.classList.add(type.toLowerCase()));
+	    pokemonElement.style.background = getBackgroundColor(pokemon.types);
+	    pokemonElement.innerHTML = `
+	      <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" />
+	      <div class="pokemon-info">
+	        <h3>${pokemon.name}</h3>
+	        <p>Tipo: ${pokemon.types.join(', ')}</p>
+	        <p>${pokemon.description}</p>
+	      </div>
+	    `;
 
-async function generatePokedex() {
+	    pokedexContainer.appendChild(pokemonElement);
+	  }
+	}
 
-  const pokedexContainer = document.getElementById('pokedex');
-  for (let i = (page - 1) * limit + 1; i <= page * limit; i++) {
-  const pokemon = await getPokemonData(i);
+	generatePokedex();
 
-    const pokemonElement = document.createElement('div');
-    pokemonElement.classList.add('pokemon');
-    pokemon.types.forEach(type => pokemonElement.classList.add(type.toLowerCase())); 
-    pokemonElement.style.background = getBackgroundColor(pokemon.types);
-    pokemonElement.innerHTML = `
-      <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" />
-      <div class="pokemon-info">
-        <h3>${pokemon.name}</h3>
-        <p>Tipo: ${pokemon.types.join(', ')}</p>
-        <p>${pokemon.description}</p>
-      </div>
-    `;
+	window.onscroll = async () => {
+	  if (window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+	    page++;
+	    await generatePokedex();
+	  }
+	};
 
-    pokedexContainer.appendChild(pokemonElement);
-  }
-}
-
-generatePokedex();
-
-window.onscroll = async () => {
-  if (window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
-    page++;
-    await generatePokedex();
-  }
-};
-
-
-function getBackgroundColor(types) {
+	function getBackgroundColor(types) {
   const colors = {
     normal: '#A8A878',
     fire: '#F08030',
@@ -142,11 +177,11 @@ function getBackgroundColor(types) {
   const backgroundColors = types.map(type => colors[type.toLowerCase()]);
   const gradientColors = backgroundColors.length > 1 ? backgroundColors : [backgroundColors[0], backgroundColors[0]];
 
-  const color = `linear-gradient(90deg, ${gradientColors[0]} 50%, ${gradientColors[1]} 50%)`;
-  return color;
+  const bgColor = `linear-gradient(90deg, ${gradientColors[0]} 50%, ${gradientColors[1]} 50%)`;
+  return bgColor;
 }
+
 
   </script>
 </body>
 </html>
-```
